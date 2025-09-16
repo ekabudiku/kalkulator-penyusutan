@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Harga Tanah</title>
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --text: #333;
+      --card: #fff;
+      --accent: #007bff;
+      --accent-hover: #0056b3;
+      --result-bg: #eef;
+    }
+    body.dark {
+      --bg: #1e1e1e;
+      --text: #f0f0f0;
+      --card: #2a2a2a;
+      --accent: #4da3ff;
+      --accent-hover: #1e70c1;
+      --result-bg: #2d2d2d;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 25px;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      background: var(--bg);
+      color: var(--text);
+    }
+    /* Dropdown styling */
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding-right: 30px;
+      background-image: url("data:image/svg+xml;utf8,<svg fill='%23333' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+    }
+    body.dark select {
+      background-image: url("data:image/svg+xml;utf8,<svg fill='%23fff' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    }
+    button {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover {
+      background: var(--accent-hover);
+    }
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      background: var(--result-bg);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    th {
+      text-align: left;
+      font-weight: normal;
+    }
+    td {
+      text-align: right;
+    }
+    .mode-toggle {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 20px 0;
+    }
+    .toggle-btn {
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-size: 0.9em;
+    }
+    .toggle-btn:hover {
+      background: var(--accent-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="mode-toggle">
+    <button class="toggle-btn" onclick="toggleMode()">🌙 / ☀️ Mode</button>
+  </div>
+
+  <div class="container">
+    <h2>Kalkulator Harga Tanah</h2>
+
+    <div class="form-group">
+      <label>Jenis Bangunan</label>
+      <select id="jenis">
+        <option value="Rumah">Rumah</option>
+        <option value="Ruko">Ruko</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Luas Tanah (m²)</label>
+      <input type="number" id="luasTanah" value="200">
+    </div>
+
+    <div class="form-group">
+      <label>Luas Bangunan (m²)</label>
+      <input type="number" id="luas" value="100">
+    </div>
+
+    <div class="form-group">
+      <label>Biaya per m² Bangunan (Rp)</label>
+      <input type="number" id="biaya" value="2500000">
+    </div>
+
+    <div class="form-group">
+      <label>Tahun Pembuatan</label>
+      <input type="number" id="tahunBuat" value="2010">
+    </div>
+
+    <div class="form-group">
+      <label>Tahun Renovasi (opsional)</label>
+      <input type="number" id="tahunRenov" placeholder="kosongkan jika tidak ada">
+    </div>
+
+    <div class="form-group">
+      <label>Tahun Penilaian</label>
+      <input type="number" id="tahunNilai" value="2025">
+    </div>
+
+    <div class="form-group">
+      <label>Kondisi Bangunan</label>
+      <select id="kondisi">
+        <option value="BS">Baik Sekali</option>
+        <option value="B">Baik</option>
+        <option value="S">Sedang</option>
+        <option value="J">Jelek</option>
+        <option value="JS">Jelek Sekali</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Harga Tanah + Bangunan (Rp)</label>
+      <input type="number" id="hargaTotal" value="1000000000">
+    </div>
+
+    <button onclick="hitung()">Hitung Harga Tanah</button>
+    <div class="result" id="hasil"></div>
+  </div>
+
+<script>
+// === JSON Penyusutan Lengkap (0–50 tahun) ===
+// (sudah diekstrak dari Excel, Rumah & Ruko, BS–JS)
+const tabelPenyusutan = {
+  "Rumah": {
+    "<=2000000": {
+      "BS": [0,4,8,11,14,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16],
+      "B":  [0,5,9,13,15,18,21,24,27,31,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34],
+      "S":  [0,6,10,14,18,22,26,29,32,35,38,41,44,47,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50],
+      "J":  [0,7,12,17,22,26,30,34,38,41,44,47,50,53,56,59,62,65,68,71,74,77,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80],
+      "JS": [0,8,14,20,25,30,35,39,43,47,50,53,56,59,62,65,68,71,74,77,80,83,86,89,92,95,98,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+    },
+    ">2000000": {
+      "BS": [0,3,5,7,10,12,14,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15],
+      "B":  [0,4,7,10,13,16,18,20,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36],
+      "S":  [0,5,9,13,17,19,22,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,99,100,100,100,100,100,100],
+      "J":  [0,6,11,16,20,24,28,32,35,38,41,44,47,50,53,56,59,62,65,68,71,74,77,80,83,86,89,92,95,98,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+      "JS": [0,7,13,19,25,30,35,40,45,49,53,57,61,65,69,73,77,81,85,89,93,96,99,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+    }
+  },
+  "Ruko": {
+    "<=3000000": {
+      "BS": [0,3,7,10,12,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14],
+      "B":  [0,4,8,11,14,17,20,23,26,29,30,32,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72],
+      "S":  [0,5,9,13,17,21,25,27,30,33,36,39,42,45,48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,96,99,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+      "J":  [0,6,10,14,18,22,26,30,34,38,41,44,47,50,53,56,59,62,65,68,71,74,77,80,83,86,89,92,95,98,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+      "JS": [0,7,11,15,19,23,27,31,35,39,43,47,51,55,59,63,67,71,75,79,83,87,91,95,99,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+    },
+    ">3000000": {
+      "BS": [0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100],
+      "B":  [0,3,5,8,10,13,16,19,22,25,28,31,34,37,40,43,46,49,52,55,58,61,64,67,70,73,76,79,82,85,88,91,94,97,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+      "S":  [0,4,7,10,14,18,22,26,30,34,38,42,46,50,54,58,62,66,70,74,78,82,86,90,94,98,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+      "J":  [0,5,9,13,17,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100],
+      "JS": [0,6,10,14,18,22,26,30,34,38,42,46,50,54,58,62,66,70,74,78,82,86,90,94,98,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+    }
+  }
+};
+
+function hitung() {
+  let jenis = document.getElementById("jenis").value;
+  let luasTanah = parseFloat(document.getElementById("luasTanah").value);
+  let luas = parseFloat(document.getElementById("luas").value);
+  let biaya = parseFloat(document.getElementById("biaya").value);
+  let tb = parseInt(document.getElementById("tahunBuat").value);
+  let tr = parseInt(document.getElementById("tahunRenov").value);
+  let tp = parseInt(document.getElementById("tahunNilai").value);
+  let kondisi = document.getElementById("kondisi").value;
+  let hargaTotal = parseFloat(document.getElementById("hargaTotal").value);
+
+  let npbb = luas * biaya;
+  let ue = isNaN(tr) ? (tp - tb) : ((tp - tb) + 2*(tp - tr)) / 3;
+  ue = Math.max(0, Math.min(50, Math.floor(ue)));
+
+  let batas = (jenis === "Rumah") ? 2000000 : 3000000;
+  let kelompok = (biaya <= batas) ? "<=" + batas : ">" + batas;
+
+  let persen = tabelPenyusutan[jenis][kelompok][kondisi][ue];
+  let penyusutan = npbb * persen/100;
+  let nilaiBangunan = npbb - penyusutan;
+  let hargaTanah = hargaTotal - nilaiBangunan;
+  let hargaPerM2 = hargaTanah / luasTanah;
+
+  document.getElementById("hasil").innerHTML = `
+    <b>Hasil Perhitungan:</b>
+    <table>
+      <tr><th>NPBB</th><td>Rp ${npbb.toLocaleString()}</td></tr>
+      <tr><th>Umur Efektif</th><td>${ue} tahun</td></tr>
+      <tr><th>Persentase Penyusutan</th><td>${persen}%</td></tr>
+      <tr><th>Penyusutan</th><td>Rp ${penyusutan.toLocaleString()}</td></tr>
+      <tr><th>Nilai Bangunan</th><td>Rp ${nilaiBangunan.toLocaleString()}</td></tr>
+      <tr><th>Harga Tanah</th><td><b>Rp ${hargaTanah.toLocaleString()}</b></td></tr>
+      <tr><th>Harga Tanah per m²</th><td><b>Rp ${Math.round(hargaPerM2).toLocaleString()}</b></td></tr>
+    </table>
+  `;
+}
+
+function toggleMode() {
+  document.body.classList.toggle("dark");
+}
+</script>
+</body>
+</html>
