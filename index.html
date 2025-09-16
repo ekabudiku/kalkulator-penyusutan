@@ -3,1313 +3,380 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kalkulator Harga Tanah</title>
+  <title>Kalkulator Nilai Tanah & Bangunan</title>
   <style>
+    /* 1. Pengaturan Dasar & Variabel Warna */
     :root {
-      --bg: #f9f9f9;
-      --text: #333;
-      --card: #fff;
-      --accent: #007bff;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #212529;
+      --border-color: #dee2e6;
+      --accent-color: #007bff;
       --accent-hover: #0056b3;
-      --result-bg: #eef;
+      --result-bg: #e9ecef;
+      --result-final-bg: #d1e7dd; /* Latar belakang hijau lembut untuk hasil akhir */
+      --result-final-text: #0a3622;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
+
     body.dark {
-      --bg: #1e1e1e;
-      --text: #f0f0f0;
-      --card: #2a2a2a;
-      --accent: #4da3ff;
-      --accent-hover: #1e70c1;
-      --result-bg: #2d2d2d;
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e9ecef;
+      --border-color: #495057;
+      --accent-color: #4dabf7;
+      --accent-hover: #1c7ed6;
+      --result-bg: #343a40;
+      --result-final-bg: #143e3d;
+      --result-final-text: #a6d9b8;
     }
+    
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
       margin: 0;
-      padding: 0;
-      transition: all 0.3s ease;
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text-color);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+
+    /* 2. Layout Kontainer Utama */
     .container {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 25px;
-      background: var(--card);
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: var(--card-bg);
       border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
     }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1em;
-      background: var(--bg);
-      color: var(--text);
-    }
-    select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      padding-right: 30px;
-      background-image: url("data:image/svg+xml;utf8,<svg fill='%23333' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      background-size: 16px;
-    }
-    body.dark select {
-      background-image: url("data:image/svg+xml;utf8,<svg fill='%23fff' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    }
-    button {
-      display: block;
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-    button:hover {
-      background: var(--accent-hover);
-    }
-    .result {
-      margin-top: 25px;
-      padding: 15px;
-      background: var(--result-bg);
-      border-radius: 8px;
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ccc;
-    }
-    th {
-      text-align: left;
-      font-weight: normal;
-    }
-    td {
-      text-align: right;
-    }
-    .mode-toggle {
+    
+    .topbar {
       display: flex;
       justify-content: flex-end;
-      padding: 10px 20px 0;
+      margin-bottom: 1rem;
     }
-    .toggle-btn {
-      cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 6px;
-      background: var(--accent);
-      color: #fff;
+    
+    .topbar button {
+        background-color: transparent;
+        color: var(--accent-color);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .topbar button:hover {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--accent-color);
+      margin-top: 0;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+
+    /* 3. Grid untuk Input Form yang Adaptif */
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      /* Default 1 kolom untuk mobile */
+      grid-template-columns: 1fr; 
+    }
+
+    /* 2 kolom untuk tablet */
+    @media (min-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* 3 kolom untuk desktop */
+    @media (min-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* 4. Styling Elemen Form */
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+
+    /* 5. Tombol Aksi yang Terpusat */
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 2.5rem;
+    }
+
+    .action-button {
+      padding: 0.8rem 1.5rem;
+      background-color: var(--accent-color);
+      color: white;
       border: none;
-      font-size: 0.9em;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: background-color 0.3s, transform 0.2s;
+      width: 100%;
+      max-width: 300px; /* Lebar maksimal di layar besar */
     }
-    .toggle-btn:hover {
-      background: var(--accent-hover);
+
+    .action-button:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-2px);
     }
+    
+    /* 6. Area Hasil yang Lebih Terstruktur */
+    .result {
+      margin-top: 2.5rem;
+      padding: 1.5rem;
+      background-color: var(--result-bg);
+      border-radius: 8px;
+      word-wrap: break-word;
+    }
+    
+    .result h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+    }
+
+    .result-line {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .result-line:last-child {
+        border-bottom: none;
+    }
+
+    .result-line span {
+        opacity: 0.9;
+    }
+    
+    /* Hasil akhir yang paling penting dibuat menonjol */
+    .result-final {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: var(--result-final-bg);
+        color: var(--result-final-text);
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .result-final .label {
+        display: block;
+        font-size: 1.1rem;
+    }
+
+    .result-final .value {
+        display: block;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
   </style>
 </head>
 <body>
-  <div class="mode-toggle">
-    <button class="toggle-btn" onclick="toggleMode()">🌙 / ☀️ Mode</button>
-  </div>
-
   <div class="container">
-    <h2>Kalkulator Harga Tanah</h2>
+    <div class="topbar">
+      <button onclick="toggleDarkMode()">🌙/☀️</button>
+    </div>
+    <h2>Kalkulator Nilai Properti</h2>
 
-    <div class="form-group">
-      <label>Jenis Bangunan</label>
-      <select id="jenis">
-        <option value="Rumah">Rumah</option>
-        <option value="Ruko">Ruko</option>
-      </select>
+    <div class="grid">
+      <div>
+        <label for="status">Status Kepemilikan</label>
+        <select id="status">
+          <option value="HM">HM</option>
+          <option value="HGB">HGB</option>
+          <option value="TMA">TMA</option>
+        </select>
+      </div>
+      <div>
+        <label for="jenis">Jenis Data</label>
+        <select id="jenis">
+          <option value="Penawaran">Penawaran</option>
+          <option value="Transaksi">Transaksi</option>
+          <option value="Individu">Individu</option>
+        </select>
+      </div>
+      <div>
+        <label for="tanggal">Tgl. Penawaran/Transaksi</label>
+        <input type="date" id="tanggal">
+      </div>
+      <div>
+        <label for="harga">Harga Penawaran/Transaksi (Rp)</label>
+        <input type="number" id="harga" placeholder="Contoh: 1500000000">
+      </div>
+      <div>
+        <label for="luasTanah">Luas Tanah (m²)</label>
+        <input type="number" id="luasTanah" placeholder="Contoh: 120">
+      </div>
+      <div>
+        <label for="luasBangunan">Luas Bangunan (m²)</label>
+        <input type="number" id="luasBangunan" placeholder="Contoh: 90">
+      </div>
+      <div>
+        <label for="tahunPembuatan">Tahun Pembuatan</label>
+        <input type="number" id="tahunPembuatan" placeholder="Contoh: 2010">
+      </div>
+      <div>
+        <label for="tahunRenovasi">Tahun Renovasi (opsional)</label>
+        <input type="number" id="tahunRenovasi" placeholder="Contoh: 2020">
+      </div>
+      <div>
+        <label for="kondisi">Kondisi Fisik</label>
+        <select id="kondisi">
+          <option value="BS">Baik Sekali</option>
+          <option value="B">Baik</option>
+          <option value="S">Sedang</option>
+          <option value="J">Jelek</option>
+          <option value="JS">Jelek Sekali</option>
+        </select>
+      </div>
+      <div>
+        <label for="biaya">Biaya per m² Bangunan (Rp)</label>
+        <input type="number" id="biaya" placeholder="Contoh: 3000000">
+      </div>
+      <div>
+        <label for="jenisBangunan">Jenis Bangunan</label>
+        <select id="jenisBangunan">
+          <option value="rumah">Rumah</option>
+          <option value="ruko">Ruko</option>
+        </select>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label>Luas Tanah (m²)</label>
-      <input type="number" id="luasTanah" value="200">
+    <div class="button-container">
+      <button class="action-button" onclick="hitung()">Hitung Nilai</button>
     </div>
 
-    <div class="form-group">
-      <label>Luas Bangunan (m²)</label>
-      <input type="number" id="luas" value="100">
-    </div>
-
-    <div class="form-group">
-      <label>Biaya per m² Bangunan (Rp)</label>
-      <input type="number" id="biaya" value="2500000">
-    </div>
-
-    <div class="form-group">
-      <label>Tahun Pembuatan</label>
-      <input type="number" id="tahunBuat" value="2010">
-    </div>
-
-    <div class="form-group">
-      <label>Tahun Renovasi (opsional)</label>
-      <input type="number" id="tahunRenov" placeholder="kosongkan jika tidak ada">
-    </div>
-
-    <div class="form-group">
-      <label>Tahun Penilaian</label>
-      <input type="number" id="tahunNilai" value="2025">
-    </div>
-
-    <div class="form-group">
-      <label>Kondisi Bangunan</label>
-      <select id="kondisi">
-        <option value="BS">Baik Sekali</option>
-        <option value="B">Baik</option>
-        <option value="S">Sedang</option>
-        <option value="J">Jelek</option>
-        <option value="JS">Jelek Sekali</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Harga Tanah + Bangunan (Rp)</label>
-      <input type="number" id="hargaTotal" value="1000000000">
-    </div>
-
-    <button onclick="hitung()">Hitung Harga Tanah</button>
-    <div class="result" id="hasil"></div>
+    <div class="result" id="output"></div>
   </div>
 
 <script>
-// === JSON Penyusutan Lengkap (0–50 tahun) ===
-const tabelPenyusutan = {
-  "Rumah": {
-    "<=2000000": {
-      "BS": [
-        0,
-        4,
-        8,
-        11,
-        14,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16,
-        16
-      ],
-      "B": [
-        0,
-        5,
-        9,
-        13,
-        15,
-        18,
-        21,
-        24,
-        27,
-        31,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34,
-        34
-      ],
-      "S": [
-        0,
-        6,
-        10,
-        14,
-        18,
-        22,
-        26,
-        29,
-        32,
-        35,
-        38,
-        41,
-        44,
-        47,
-        50,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52,
-        52
-      ],
-      "J": [
-        0,
-        7,
-        12,
-        17,
-        22,
-        26,
-        30,
-        34,
-        38,
-        41,
-        44,
-        47,
-        50,
-        53,
-        56,
-        59,
-        62,
-        64,
-        66,
-        68,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70,
-        70
-      ],
-      "JS": [
-        0,
-        8,
-        14,
-        20,
-        25,
-        30,
-        35,
-        39,
-        43,
-        47,
-        50,
-        53,
-        56,
-        59,
-        62,
-        64,
-        66,
-        68,
-        70,
-        72,
-        74,
-        76,
-        77,
-        78,
-        79,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80
-      ]
-    },
-    ">2000000": {
-      "BS": [
-        0,
-        3,
-        5,
-        7,
-        10,
-        12,
-        14,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15
-      ],
-      "B": [
-        0,
-        4,
-        7,
-        10,
-        13,
-        16,
-        19,
-        22,
-        24,
-        26,
-        28,
-        30,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32,
-        32
-      ],
-      "S": [
-        0,
-        5,
-        9,
-        13,
-        17,
-        20,
-        23,
-        26,
-        29,
-        32,
-        35,
-        38,
-        40,
-        42,
-        44,
-        46,
-        48,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50
-      ],
-      "J": [
-        0,
-        6,
-        11,
-        16,
-        20,
-        24,
-        28,
-        31,
-        34,
-        37,
-        40,
-        43,
-        46,
-        49,
-        52,
-        54,
-        56,
-        58,
-        60,
-        62,
-        64,
-        66,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67,
-        67
-      ],
-      "JS": [
-        0,
-        7,
-        11,
-        16,
-        21,
-        27,
-        31,
-        35,
-        38,
-        43,
-        47,
-        50,
-        53,
-        56,
-        58,
-        60,
-        63,
-        65,
-        67,
-        69,
-        71,
-        73,
-        75,
-        76,
-        77,
-        78,
-        79,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80,
-        80
-      ]
-    }
-  },
-  "Ruko": {
-    "<=3000000": {
-      "BS": [
-        0,
-        3,
-        7,
-        10,
-        12,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14,
-        14
-      ],
-      "B": [
-        0,
-        4,
-        8,
-        11,
-        14,
-        17,
-        20,
-        23,
-        26,
-        28,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30,
-        30
-      ],
-      "S": [
-        0,
-        5,
-        9,
-        13,
-        17,
-        21,
-        25,
-        29,
-        32,
-        35,
-        38,
-        41,
-        44,
-        47,
-        49,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51,
-        51
-      ],
-      "J": [
-        0,
-        6,
-        10,
-        14,
-        18,
-        22,
-        26,
-        30,
-        34,
-        38,
-        41,
-        44,
-        47,
-        50,
-        53,
-        56,
-        58,
-        60,
-        62,
-        64,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66,
-        66
-      ],
-      "JS": [
-        0,
-        7,
-        11,
-        15,
-        19,
-        23,
-        27,
-        31,
-        35,
-        39,
-        43,
-        47,
-        50,
-        53,
-        56,
-        59,
-        62,
-        64,
-        66,
-        68,
-        70,
-        72,
-        74,
-        76,
-        77,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78,
-        78
-      ]
-    },
-    ">3000000": {
-      "BS": [
-        0,
-        2,
-        4,
-        6,
-        8,
-        10,
-        12,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13,
-        13
-      ],
-      "B": [
-        0,
-        3,
-        5,
-        8,
-        10,
-        13,
-        15,
-        17,
-        20,
-        22,
-        24,
-        26,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28,
-        28
-      ],
-      "S": [
-        0,
-        4,
-        7,
-        10,
-        14,
-        18,
-        21,
-        24,
-        27,
-        30,
-        33,
-        36,
-        39,
-        41,
-        43,
-        45,
-        47,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49,
-        49
-      ],
-      "J": [
-        0,
-        5,
-        9,
-        13,
-        17,
-        21,
-        24,
-        29,
-        32,
-        35,
-        38,
-        41,
-        44,
-        47,
-        49,
-        51,
-        53,
-        55,
-        57,
-        59,
-        61,
-        63,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65,
-        65
-      ],
-      "JS": [
-        0,
-        6,
-        10,
-        14,
-        18,
-        22,
-        26,
-        30,
-        34,
-        38,
-        41,
-        44,
-        47,
-        50,
-        52,
-        54,
-        56,
-        58,
-        60,
-        62,
-        64,
-        66,
-        68,
-        70,
-        72,
-        74,
-        76,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77,
-        77
-      ]
-    }
-  }
-};
-
-function hitung() {
-  let jenis = document.getElementById("jenis").value;
-  let luasTanah = parseFloat(document.getElementById("luasTanah").value);
-  let luas = parseFloat(document.getElementById("luas").value);
-  let biaya = parseFloat(document.getElementById("biaya").value);
-  let tb = parseInt(document.getElementById("tahunBuat").value);
-  let tr = parseInt(document.getElementById("tahunRenov").value);
-  let tp = parseInt(document.getElementById("tahunNilai").value);
-  let kondisi = document.getElementById("kondisi").value;
-  let hargaTotal = parseFloat(document.getElementById("hargaTotal").value);
-
-  let npbb = luas * biaya;
-  let ue = isNaN(tr) ? (tp - tb) : ((tp - tb) + 2*(tp - tr)) / 3;
-  ue = Math.max(0, Math.min(50, Math.floor(ue)));
-
-  let batas = (jenis === "Rumah") ? 2000000 : 3000000;
-  let kelompok = (biaya <= batas) ? "<=" + batas : ">" + batas;
-
-  let persen = tabelPenyusutan[jenis][kelompok][kondisi][ue];
-  let penyusutan = npbb * persen/100;
-  let nilaiBangunan = npbb - penyusutan;
-  let hargaTanah = hargaTotal - nilaiBangunan;
-  let hargaPerM2 = hargaTanah / luasTanah;
-
-  document.getElementById("hasil").innerHTML = `
-    <b>Hasil Perhitungan:</b>
-    <table>
-      <tr><th>NPBB</th><td>Rp ${npbb.toLocaleString()}</td></tr>
-      <tr><th>Umur Efektif</th><td>${ue} tahun</td></tr>
-      <tr><th>Persentase Penyusutan</th><td>${persen}%</td></tr>
-      <tr><th>Penyusutan</th><td>Rp ${penyusutan.toLocaleString()}</td></tr>
-      <tr><th>Nilai Bangunan</th><td>Rp ${nilaiBangunan.toLocaleString()}</td></tr>
-      <tr><th>Harga Tanah</th><td><b>Rp ${hargaTanah.toLocaleString()}</b></td></tr>
-      <tr><th>Harga Tanah per m²</th><td><b>Rp ${Math.round(hargaPerM2).toLocaleString()}</b></td></tr>
-    </table>
-  `;
+function toggleDarkMode(){
+  document.body.classList.toggle("dark");
 }
 
-function toggleMode() {
-  document.body.classList.toggle("dark");
+const tabelPenyusutan = {
+  rumah:{ low:{BS:[0,0,4],B:[0,0,5],S:[0,0,6],J:[0,0,7],JS:[0,0,8]},
+         high:{BS:[0,0,3],B:[0,0,4],S:[0,0,5],J:[0,0,6],JS:[0,0,7]}},
+  ruko:{ low:{BS:[0,0,3],B:[0,0,4],S:[0,0,5],J:[0,0,6],JS:[0,0,7]},
+        high:{BS:[0,0,2],B:[0,0,3],S:[0,0,4],J:[0,0,5],JS:[0,0,6]}}
+};
+
+function hitung(){
+  // Mengambil nilai dari semua input
+  const status = document.getElementById("status").value;
+  const jenis = document.getElementById("jenis").value;
+  const tanggal = new Date(document.getElementById("tanggal").value);
+  const harga = parseFloat(document.getElementById("harga").value);
+  const luasTanah = parseFloat(document.getElementById("luasTanah").value);
+  const luasBangunan = parseFloat(document.getElementById("luasBangunan").value);
+  const tahunPembuatan = parseInt(document.getElementById("tahunPembuatan").value);
+  const tahunRenovasi = parseInt(document.getElementById("tahunRenovasi").value) || null;
+  const kondisi = document.getElementById("kondisi").value;
+  const biaya = parseFloat(document.getElementById("biaya").value);
+  const jenisBangunan = document.getElementById("jenisBangunan").value;
+  
+  // Validasi input dasar
+  if (!tanggal.getTime() || !harga || !luasTanah || !luasBangunan || !tahunPembuatan || !biaya) {
+      document.getElementById("output").innerHTML = `<div class="result-line"><span>Error</span><strong> Tolong Isi Semua Broo!!! </strong></div>`;
+      return;
+  }
+
+  // Logika Kalkulasi (tidak diubah)
+  const tahunPenilaian = 2025;
+  const NPBB = luasBangunan * biaya;
+
+  let umurEfektif = tahunPenilaian - tahunPembuatan;
+  if(tahunRenovasi){
+    umurEfektif = ((tahunPenilaian - tahunPembuatan) + 2*(tahunPenilaian - tahunRenovasi))/3;
+  }
+  umurEfektif = Math.max(0, Math.round(umurEfektif));
+
+  let kategori = "low";
+  if(jenisBangunan==="rumah" && biaya>2000000) kategori="high";
+  if(jenisBangunan==="ruko" && biaya>3000000) kategori="high";
+
+  const tabel = tabelPenyusutan[jenisBangunan][kategori][kondisi];
+  const umurIdx = Math.min(umurEfektif, tabel.length-1);
+  const persen = tabel[umurIdx] || 100;
+  const penyusutan = NPBB * (persen/100);
+
+  const nilaiBangunan = NPBB - penyusutan;
+  let hargaPenyesuaian = harga;
+  if(jenis==="Penawaran") hargaPenyesuaian *= 0.9;
+
+  const hargaTanah = Math.max(0, hargaPenyesuaian - nilaiBangunan);
+
+  const tPenilaian = new Date("2025-11-30");
+  const diff = (tPenilaian - tanggal)/(1000*60*60*24);
+  const penyesuaianWaktu = (diff/365)*0.10;
+
+  let penyesuaianStatus = 0;
+  if(status==="TMA") penyesuaianStatus=0.10;
+  if(status==="HGB") penyesuaianStatus=0.05;
+
+  const nilluas = (1+penyesuaianWaktu+penyesuaianStatus)*hargaTanah;
+  const nilai = luasTanah > 0 ? nilluas / luasTanah : 0;
+
+  // Memformat output menjadi lebih terstruktur dan mudah dibaca
+  document.getElementById("output").innerHTML = `
+    <h3>Hasil Rincian Kalkulasi</h3>
+    <div class="result-line"><span>NPBB</span><strong>Rp ${NPBB.toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Umur Efektif</span><strong>${umurEfektif} tahun</strong></div>
+    <div class="result-line"><span>Persen Penyusutan</span><strong>${persen}%</strong></div>
+    <div class="result-line"><span>Nilai Bangunan</span><strong>Rp ${nilaiBangunan.toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Harga Setelah Penyesuaian</span><strong>Rp ${hargaPenyesuaian.toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Indikasi Nilai Tanah</span><strong>Rp ${hargaTanah.toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Penyesuaian Waktu</span><strong>${(penyesuaianWaktu*100).toFixed(2)}%</strong></div>
+    <div class="result-line"><span>Penyesuaian Kepemilikan</span><strong>${(penyesuaianStatus*100).toFixed(2)}%</strong></div>
+    <div class="result-line"><span>Nilai Lahan Total (Telah Disesuaikan)</span><strong>Rp ${nilluas.toLocaleString('id-ID')}</strong></div>
+    
+    <div class="result-final">
+        <span class="label">Estimasi Nilai per m²</span>
+        <span class="value">Rp ${nilai.toLocaleString('id-ID')}</span>
+    </div>
+  `;
 }
 </script>
 </body>
