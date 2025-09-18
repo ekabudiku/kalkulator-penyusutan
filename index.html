@@ -94,6 +94,10 @@
       font-size: 1rem;
       box-sizing: border-box;
     }
+    /* Set alignment for formatted number inputs */
+    input.rupiah-input {
+      text-align: right;
+    }
     .button-container {
       display: flex;
       justify-content: center;
@@ -222,7 +226,7 @@
       </div>
       <div>
         <label>Harga Penawaran/Transaksi (Rp)</label>
-        <input type="number" id="harga" placeholder="Contoh: 1500000000">
+        <input type="text" id="harga" class="rupiah-input" placeholder="Contoh: 1.500.000.000" oninput="formatRupiah(this)">
       </div>
       <div>
         <label>Luas Tanah (m²)</label>
@@ -252,7 +256,7 @@
       </div>
       <div>
         <label>Biaya per m² Bangunan (Rp)</label>
-        <input type="number" id="biaya" placeholder="Contoh: 3500000">
+        <input type="text" id="biaya" class="rupiah-input" placeholder="Contoh: 3.500.000" oninput="formatRupiah(this)">
       </div>
       <div>
         <label>Jenis Bangunan</label>
@@ -282,6 +286,21 @@
 
 <script>
 function toggleDarkMode(){ document.body.classList.toggle("dark"); }
+
+// Ditambahkan: Fungsi untuk format input Rupiah
+function formatRupiah(inputElement) {
+    // 1. Ambil nilai & hapus semua karakter non-digit
+    let value = inputElement.value.replace(/\D/g, '');
+    
+    // 2. Jika ada nilai, format dengan pemisah ribuan (titik)
+    if (value) {
+        inputElement.value = new Intl.NumberFormat('id-ID').format(value);
+    } else {
+        // Jika kosong, biarkan kosong
+        inputElement.value = '';
+    }
+}
+
 
 const tabelPenyusutan = {
     "rumah": {
@@ -322,18 +341,24 @@ function hitung(){
   const status = document.getElementById("status").value;
   const jenis = document.getElementById("jenis").value;
   const tanggal = new Date(document.getElementById("tanggal").value);
-  const harga = parseFloat(document.getElementById("harga").value);
+  
+  // Diubah: Hapus titik sebelum parsing angka
+  const harga = parseFloat(document.getElementById("harga").value.replace(/\./g, '')) || 0;
+  
   const luasTanah = parseFloat(document.getElementById("luasTanah").value);
   const luasBangunan = parseFloat(document.getElementById("luasBangunan").value);
   const tahunPembuatan = parseInt(document.getElementById("tahunPembuatan").value);
   const tahunRenovasi = parseInt(document.getElementById("tahunRenovasi").value);
   const kondisi = document.getElementById("kondisi").value;
-  const biaya = parseFloat(document.getElementById("biaya").value);
+  
+  // Diubah: Hapus titik sebelum parsing angka
+  const biaya = parseFloat(document.getElementById("biaya").value.replace(/\./g, '')) || 0;
+
   const jenisBangunan = document.getElementById("jenisBangunan").value;
   const outputDiv = document.getElementById("output");
 
   if (!tanggal.getTime() || !harga || !luasTanah || !luasBangunan || !tahunPembuatan || !biaya) {
-    outputDiv.innerHTML = `<div class="result-line"><span>Error</span><strong>Harap lengkapi semua kolomnya Bro! .</strong></div>`;
+    outputDiv.innerHTML = `<div class="result-line"><span>Error</span><strong>Harap lengkapi semua kolom yang wajib diisi.</strong></div>`;
     return;
   }
 
@@ -346,7 +371,7 @@ function hitung(){
   } else {
     umurEfektif = tahunPenilaian - tahunPembuatan;
   }
-  umurEfektif = Math.max(0, Math.min(50, Math.round(umurEfektif)));
+  umurEfektif = Math.max(0, Math.min(50, Math.ceil(umurEfektif)));
 
   let kategori = "low";
   if(jenisBangunan==="rumah" && biaya>2000000) kategori="high";
@@ -377,7 +402,7 @@ function hitung(){
   outputDiv.innerHTML = `
     <h3>Hasil Rincian Kalkulasi</h3>
     <div class="result-line"><span>Nilai Pengganti Bangunan Baru (NPBB)</span><strong>Rp ${NPBB.toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Umur Efektif</span><strong>${umurEfektif} tahun</strong></div>
+    <div class="result-line"><span>Umur Efektif (Dibulatkan ke atas)</span><strong>${umurEfektif} tahun</strong></div>
     <div class="result-line"><span>Persentase Penyusutan</span><strong>${persen}%</strong></div>
     <div class="result-line"><span>Nilai Pasar Bangunan</span><strong>Rp ${nilaiBangunan.toLocaleString('id-ID')}</strong></div>
     <div class="result-line"><span>Harga Setelah Penyesuaian Data</span><strong>Rp ${hargaPenyesuaian.toLocaleString('id-ID')}</strong></div>
