@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kalkulator Nilai Properti</title>
-  <link rel="icon" type="image/png" href="favicon.png">
+   <link rel="icon" type="image/png" href="favicon.png">
   <style>
     :root {
-      --bg: #f8f9fa; --card-bg: #ffffff; --text-color: #212529;
-      --border-color: #dee2e6; --accent-color: #007bff; --accent-hover: #0056b3;
-      --result-bg: #e9ecef; --result-final-bg: #d1e7dd; --result-final-text: #0a3622;
-      --shadow: 0 4px 12px rgba(0,0,0,0.08);
-      --font-sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --bg:#f8f9fa;--card-bg:#fff;--text-color:#212529;
+      --border-color:#dee2e6;--accent-color:#007bff;--accent-hover:#0056b3;
+      --result-bg:#e9ecef;--result-final-bg:#d1e7dd;--result-final-text:#0a3622;
+      --shadow:0 4px 12px rgba(0,0,0,0.08);
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     }
     body.dark {
       --bg:#121212;--card-bg:#1e1e1e;--text-color:#e9ecef;--border-color:#495057;
@@ -94,7 +94,6 @@
 
 <script>
 function formatRupiah(el){let v=el.value.replace(/\D/g,'');el.value=v?new Intl.NumberFormat('id-ID').format(v):'';}
-
 function toggleInput(){
   const jenis=document.getElementById("jenisProperti").value;
   const isLahan = jenis==="lahan";
@@ -139,7 +138,6 @@ const tabelPenyusutan = {
   }
 };
 
-
 function hitung(){
   const jenisProperti=document.getElementById("jenisProperti").value;
   const status=document.getElementById("status").value;
@@ -150,7 +148,7 @@ function hitung(){
   const outputDiv=document.getElementById("output");
   if(!tanggal.getTime()||!harga||!luasTanah){outputDiv.innerHTML="<b>Error:</b> Lengkapi kolom.";return;}
 
-  // hargaPenyesuaian sesuai rumus Excel
+  // Harga penyesuaian
   let hargaPenyesuaian;
   if (jenis==="Penawaran") {
     hargaPenyesuaian=harga*0.9;
@@ -160,23 +158,24 @@ function hitung(){
     outputDiv.innerHTML="<b>Error:</b> Salah Entry Jenis Data.";return;
   }
 
+  // Lahan Kosong
   if(jenisProperti==="lahan"){
     let hargaDasar=hargaPenyesuaian/luasTanah;
     let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
-    let penyusutanStatus=hargaDasar*faktorStatus;
     let akhir=new Date("2025-12-31");
     let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
     let persenWaktu=0.10*tahunSelisih;
-    let penyusutanWaktu=hargaDasar*persenWaktu;
-    let hargaFinal=hargaDasar-penyusutanStatus-penyusutanWaktu;
+    let hargaFinal=hargaDasar*(1+persenWaktu+faktorStatus);
+
     outputDiv.innerHTML=`<h3>Hasil Lahan Kosong</h3>
       <div class="result-line"><span>Harga Dasar per m²</span><strong>Rp ${hargaDasar.toLocaleString('id-ID')}</strong></div>
-      <div class="result-line"><span>Penyusutan Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>Rp ${penyusutanStatus.toLocaleString('id-ID')}</strong></div>
-      <div class="result-line"><span>Penyusutan Waktu (${(persenWaktu*100).toFixed(2)}%)</span><strong>Rp ${penyusutanWaktu.toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Penyesuaian Waktu (${(persenWaktu*100).toFixed(2)}%)</span><strong>+Rp ${(hargaDasar*persenWaktu).toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${(hargaDasar*faktorStatus).toLocaleString('id-ID')}</strong></div>
       <div class="result-final"><span>Harga Akhir per m²</span><span class="value">Rp ${hargaFinal.toLocaleString('id-ID')}</span></div>`;
     return;
   }
 
+  // Bangunan (rumah/ruko)
   const luasBangunan=parseFloat(document.getElementById("luasBangunan").value)||0;
   const tahunPembuatan=parseInt(document.getElementById("tahunPembuatan").value)||0;
   const tahunRenovasi=parseInt(document.getElementById("tahunRenovasi").value)||0;
