@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kalkulator Nilai Properti</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <style>
     :root {
       --bg: #f8f9fa; --card-bg: #ffffff; --text-color: #212529;
@@ -58,7 +59,11 @@
       <select id="status"><option value="HM">HM</option><option value="HGB">HGB</option><option value="TMA">TMA</option><option value="HP">HP</option></select>
     </div>
     <div><label>Jenis Data</label>
-      <select id="jenis"><option value="Penawaran">Penawaran</option><option value="Transaksi">Transaksi</option></select>
+      <select id="jenis">
+        <option value="Penawaran">Penawaran</option>
+        <option value="Transaksi">Transaksi</option>
+        <option value="Individual">Individual</option>
+      </select>
     </div>
     <div><label>Tgl. Penawaran/Transaksi</label><input type="date" id="tanggal"></div>
     <div><label>Harga Penawaran/Transaksi (Rp)</label><input type="text" id="harga" class="rupiah-input" oninput="formatRupiah(this)"></div>
@@ -98,7 +103,7 @@ function toggleInput(){
 }
 window.onload=toggleInput;
 
-// ====== Tabel Penyusutan dari Excel (potongan contoh, bisa dilengkapi 50 tahun) ======
+// ======  tabel penyusutan ======
 const tabelPenyusutan = {
   "rumah": {
     "low": {
@@ -145,8 +150,18 @@ function hitung(){
   const outputDiv=document.getElementById("output");
   if(!tanggal.getTime()||!harga||!luasTanah){outputDiv.innerHTML="<b>Error:</b> Lengkapi kolom.";return;}
 
+  // hargaPenyesuaian sesuai rumus Excel
+  let hargaPenyesuaian;
+  if (jenis==="Penawaran") {
+    hargaPenyesuaian=harga*0.9;
+  } else if (jenis==="Transaksi" || jenis==="Individual") {
+    hargaPenyesuaian=harga;
+  } else {
+    outputDiv.innerHTML="<b>Error:</b> Salah Entry Jenis Data.";return;
+  }
+
   if(jenisProperti==="lahan"){
-    let hargaDasar=harga/luasTanah;
+    let hargaDasar=hargaPenyesuaian/luasTanah;
     let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
     let penyusutanStatus=hargaDasar*faktorStatus;
     let akhir=new Date("2025-12-31");
@@ -181,7 +196,6 @@ function hitung(){
 
   const penyusutan=NPBB*(persen/100);
   const nilaiBangunan=NPBB-penyusutan;
-  let hargaPenyesuaian=harga;if(jenis==="Penawaran")hargaPenyesuaian*=0.9;
   const hargaTanah=Math.abs(hargaPenyesuaian-nilaiBangunan);
 
   let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
