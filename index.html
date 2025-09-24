@@ -203,7 +203,14 @@ function hitung(){
   }
   umurEfektif=Math.ceil(Math.max(0,Math.min(50,umurEfektif)));
 
-  let kategori=(jenisProperti==="rumah" && biaya>2000000)?"high":"low";
+  // === Perbaikan kategori ===
+  let kategori="low";
+  if (jenisProperti==="rumah") {
+    kategori = biaya > 2000000 ? "high" : "low";
+  } else if (jenisProperti==="ruko") {
+    kategori = biaya > 3000000 ? "high" : "low";
+  }
+
   const tabel=tabelPenyusutan[jenisProperti][kategori][kondisi];
   const umurIdx=Math.min(umurEfektif,tabel.length-1);
   const persen=tabel[umurIdx]||0;
@@ -233,4 +240,3 @@ function hitung(){
 </script>
 </body>
 </html>
-
