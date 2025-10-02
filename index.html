@@ -390,7 +390,7 @@ function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBan
   `;
 }
 
-// ============ Hitung Multi (Disesuaikan dengan variabel warna baru) ==============
+// ============ Hitung Multi (TELAH DIKOREKSI) ==============
 function hitungMulti(){
   let out=document.getElementById("output"); out.innerHTML=""; let values=[];
   for(let i=1;i<=jumlahSampel;i++){
@@ -435,8 +435,12 @@ function hitungMulti(){
 
   if(values.length>1){
     let mean=values.reduce((a,b)=>a+b,0)/values.length;
-    let variance=values.reduce((a,b)=>a+Math.pow(b-mean,2),0)/values.length;
-    let sd=Math.sqrt(variance); let rsd=(sd/mean)*100;
+    
+    // KOREKSI INI: Menggunakan (values.length - 1) untuk Standard Deviasi Sampel
+    let variance=values.reduce((a,b)=>a+Math.pow(b-mean,2),0)/(values.length - 1); 
+    
+    let sd=Math.sqrt(variance); 
+    let rsd=(sd/mean)*100;
     
     let color= rsd<=25 ? activeColors.lowRSD_color : activeColors.highRSD_color;
     let bg= rsd<=25 ? activeColors.lowRSD_bg : activeColors.highRSD_bg;
@@ -475,7 +479,7 @@ function toggleDarkMode() {
     localStorage.setItem('darkModeEnabled', isDark);
     
     // Update tombol
-    toggleButton.innerText = isDark ? '🌙/☀️' : '🌙/☀️'; // Tetap seperti referensi
+    toggleButton.innerText = isDark ? '🌙/☀️' : '🌙/☀️'; 
     
     // Jalankan ulang hitungan untuk memperbarui warna hasil
     hitungMulti(); 
