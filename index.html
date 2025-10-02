@@ -244,7 +244,7 @@
 </div>
 
 <script>
-// ====== Tabel Penyusutan (TIDAK BERUBAH) ======
+// ====== Tabel Penyusutan ======
 const tabelPenyusutan = {
   "rumah": {
     "low": {
@@ -280,7 +280,7 @@ const tabelPenyusutan = {
   }
 };
 
-// ============ Utility (TIDAK BERUBAH) ==============
+// ============ Utility ============
 function formatRupiah(el){
   let v=el.value.replace(/\D/g,'');
   el.value=v?new Intl.NumberFormat('id-ID').format(v):'';
@@ -288,7 +288,8 @@ function formatRupiah(el){
 
 let jumlahSampel=0;
 function tambahSampel(){
-  if(jumlahSampel>=5){alert("Maksimal 5 sampel!");return;}
+  // KOREKSI INI: Batas maksimum dinaikkan menjadi 10
+  if(jumlahSampel>=10){alert("Maksimal 10 sampel!");return;}
   jumlahSampel++;
   const c=document.getElementById("formContainer");
   const d=document.createElement("div");
@@ -332,7 +333,7 @@ function toggleInput(i){
     .forEach(id=>document.getElementById(id+i).style.display=isLahan?"none":"block");
 }
 
-// ============ Proses Hitung (Disesuaikan dengan variabel warna baru) ==============
+// ============ Proses Hitung ==============
 function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBangunan,tahunPembuatan,tahunRenovasi,kondisi,biaya){
   let hargaPenyesuaian=(jenis==="Penawaran")?harga*0.9:harga;
   
@@ -390,7 +391,7 @@ function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBan
   `;
 }
 
-// ============ Hitung Multi (TELAH DIKOREKSI) ==============
+// ============ Hitung Multi ==============
 function hitungMulti(){
   let out=document.getElementById("output"); out.innerHTML=""; let values=[];
   for(let i=1;i<=jumlahSampel;i++){
@@ -436,7 +437,7 @@ function hitungMulti(){
   if(values.length>1){
     let mean=values.reduce((a,b)=>a+b,0)/values.length;
     
-    // KOREKSI INI: Menggunakan (values.length - 1) untuk Standard Deviasi Sampel
+    // Perhitungan varians sampel dengan Bessel's correction (n-1)
     let variance=values.reduce((a,b)=>a+Math.pow(b-mean,2),0)/(values.length - 1); 
     
     let sd=Math.sqrt(variance); 
