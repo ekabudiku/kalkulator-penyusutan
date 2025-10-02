@@ -3,117 +3,248 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kalkulator Nilai Properti</title>
-  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Kalkulator Penyusutan Properti (Multi Sampel + RSD)</title>
+   <link rel="icon" type="image/png" href="favicon.png">
   <style>
+    /* 1. VARIABEL WARNA (Mendukung Dark Mode) - Menggunakan nama variabel dari referensi baru */
     :root {
-      --bg:#f8f9fa;--card-bg:#fff;--text-color:#212529;
-      --border-color:#dee2e6;--accent-color:#007bff;--accent-hover:#0056b3;
-      --result-bg:#e9ecef;--result-final-bg:#d1e7dd;--result-final-text:#0a3622;
-      --shadow:0 4px 12px rgba(0,0,0,0.08);
-      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff; /* Menggantikan --bg-container */
+      --text-color: #333; /* Menggantikan --color-text */
+      --accent-color: #007bff; /* Menggantikan --color-primary */
+      --accent-hover: #0056b3; /* Menggantikan --bg-button-hover */
+      --border-color: #dee2e6; /* Menggantikan --color-border & --color-line */
+      --result-bg: #e9ecef; /* Menggantikan --bg-result */
+      --result-final-bg: #d1e7dd;
+      --result-final-text: #0a3622;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Menggantikan --color-shadow */
+      --bg-sampel: #fdfdfd; 
     }
+
+    /* 2. DARK MODE STYLES - Menggunakan class 'dark' */
     body.dark {
-      --bg:#121212;--card-bg:#1e1e1e;--text-color:#e9ecef;--border-color:#495057;
-      --accent-color:#4dabf7;--accent-hover:#1c7ed6;
-      --result-bg:#343a40;--result-final-bg:#143e3d;--result-final-text:#a6d9b8;
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --accent-color: #4dabf7;
+      --accent-hover: #1c7ed6;
+      --border-color: #495057;
+      --result-bg: #343a40;
+      --result-final-bg: #143e3d;
+      --result-final-text: #a6d9b8;
+      --shadow: 0 4px 12px rgba(0, 0, 0, .5);
+      --bg-sampel: #2d2d2d;
     }
-    body{margin:0;font-family:var(--font-sans);background:var(--bg);color:var(--text-color);line-height:1.6;transition:.3s}
-    .container{max-width:1100px;margin:2rem auto;padding:2rem;background:var(--card-bg);border-radius:12px;box-shadow:var(--shadow);border:1px solid var(--border-color)}
-    .topbar{display:flex;justify-content:flex-end;margin-bottom:1rem}
-    .topbar button{background:transparent;color:var(--accent-color);border:1px solid var(--border-color);padding:.5rem .8rem;border-radius:8px;cursor:pointer}
-    .topbar button:hover{background:var(--accent-color);color:#fff}
-    h2{text-align:center;color:var(--accent-color);margin:0 0 2rem;border-bottom:1px solid var(--border-color);padding-bottom:1rem}
-    .grid{display:grid;gap:1.5rem;grid-template-columns:1fr}
-    label{display:block;margin-bottom:.5rem;font-weight:600;font-size:.9rem}
-    input,select{width:100%;padding:.75rem;border:1px solid var(--border-color);border-radius:8px;background:var(--bg);color:var(--text-color);font-size:1rem;box-sizing:border-box}
-    input.rupiah-input{text-align:right}
-    .button-container{display:flex;justify-content:center;margin-top:2.5rem}
-    .action-button{padding:.8rem 1.5rem;background:var(--accent-color);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:1.1rem;font-weight:bold;width:100%;max-width:300px}
-    .action-button:hover{background:var(--accent-hover)}
-    .result{margin-top:2.5rem;padding:1.5rem;background:var(--result-bg);border-radius:8px}
-    .result h3{margin:0 0 1rem;border-bottom:1px solid var(--border-color);padding-bottom:.5rem}
-    .result-line{display:flex;justify-content:space-between;flex-wrap:wrap;padding:.6rem 0;border-bottom:1px solid var(--border-color)}
-    .result-line:last-child{border-bottom:none}
-    .result-final{margin-top:1rem;padding:1rem;background:var(--result-final-bg);color:var(--result-final-text);border-radius:8px;text-align:center}
-    .result-final .value{display:block;font-size:2rem;font-weight:bold;margin-top:.25rem}
-    .footer-icon{text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border-color)}
-    .footer-icon svg{width:32px;height:32px}
-    @media(min-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
-    @media(min-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+    /* 3. Global Reset & Base Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background: var(--bg);
+      color: var(--text-color);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* CONTAINER UTAMA */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-sizing: border-box;
+      background: var(--card-bg); /* Menggunakan --card-bg */
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    /* BARU: TOPBAR untuk Tombol Dark Mode */
+    .topbar {
+      display: flex;
+      justify-content: flex-end; /* Dorong tombol ke kanan */
+      margin-bottom: 1rem;
+      padding: 0 0.5rem; /* Sedikit padding agar tombol tidak menempel di tepi container */
+    }
+
+    /* BARU: Gaya Tombol di Topbar */
+    #darkModeToggle {
+        background: transparent;
+        color: var(--accent-color);
+        border: 1px solid var(--border-color);
+        padding: .5rem .8rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s, color 0.3s;
+    }
+    #darkModeToggle:hover {
+        background: var(--accent-color);
+        color: #fff;
+    }
+    
+    /* JUDUL */
+    h2 {
+      text-align: center;
+      color: var(--accent-color);
+      margin: 0 0 1.5rem;
+      font-size: 1.8rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+    
+    /* Form and Input Styles */
+    .sampel {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-sampel);
+    }
+
+    .sampel h3 {
+      margin-top: 0;
+      color: var(--accent-color);
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 0.8rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border-radius: 6px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
+    }
+
+    /* Button Styles */
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+    }
+
+    button:not(#darkModeToggle) {
+      width: 100%;
+      max-width: 300px;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      background: var(--accent-color);
+      color: #fff; /* Warna teks putih/terang */
+    }
+
+    button:not(#darkModeToggle):hover {
+      background: var(--accent-hover);
+    }
+
+    /* Result Styles */
+    .result {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      background: var(--result-bg);
+      border-left: 5px solid var(--accent-color);
+    }
+
+    .result h4 {
+      margin: 0 0 0.5rem;
+      color: var(--accent-color);
+      font-size: 1.1rem;
+    }
+
+    .result-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      font-size: 0.95rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .result-line:last-child {
+      border-bottom: none;
+    }
+    
+    .result-line strong {
+        text-align: right;
+    }
+
+    /* Result Final Styles (menggunakan variabel dari referensi baru) */
+    .result-final {
+      text-align: center;
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin-top: 0.8rem;
+      background: var(--result-final-bg);
+      color: var(--result-final-text);
+    }
+
+    .result-final .value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: block;
+      margin-top: 0.3rem;
+    }
+
+    /* Media Query for larger screens */
+    @media (min-width: 768px) {
+      .container {
+        padding: 2rem;
+      }
+      
+      .button-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      button:not(#darkModeToggle) {
+        width: auto;
+        min-width: 200px;
+        margin: 0;
+      }
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="topbar"><button onclick="document.body.classList.toggle('dark')">🌙/☀️</button></div>
-  <h2>Kalkulator Nilai Properti</h2>
-  <div class="grid">
-    <div><label>Jenis Properti</label>
-      <select id="jenisProperti" onchange="toggleInput()">
-        <option value="rumah">Rumah</option>
-        <option value="ruko">Ruko</option>
-        <option value="lahan">Lahan Kosong</option>
-      </select>
-    </div>
-    <div><label>Status Kepemilikan</label>
-      <select id="status">
-        <option value="HM">HM</option>
-        <option value="HGB">HGB</option>
-        <option value="TMA">TMA</option>
-        <option value="HP">HP</option>
-      </select>
-    </div>
-    <div><label>Jenis Data</label>
-      <select id="jenis">
-        <option value="Penawaran">Penawaran</option>
-        <option value="Transaksi">Transaksi</option>
-        <option value="Individual">Individual</option>
-      </select>
-    </div>
-    <div><label>Tgl. Penawaran/Transaksi</label><input type="date" id="tanggal"></div>
-    <div><label>Harga Penawaran/Transaksi (Rp)</label><input type="text" id="harga" class="rupiah-input" oninput="formatRupiah(this)"></div>
-    <div><label>Luas Tanah (m²)</label><input type="number" id="luasTanah"></div>
-    <div id="inputBangunan"><label>Luas Bangunan (m²)</label><input type="number" id="luasBangunan"></div>
-    <div id="inputTahunPembuatan"><label>Tahun Pembuatan</label><input type="number" id="tahunPembuatan"></div>
-    <div id="inputTahunRenovasi"><label>Tahun Renovasi (opsional)</label><input type="number" id="tahunRenovasi"></div>
-    <div id="inputKondisi"><label>Kondisi Fisik</label>
-      <select id="kondisi">
-        <option value="BS">Baik Sekali</option>
-        <option value="B">Baik</option>
-        <option value="S">Sedang</option>
-        <option value="J">Jelek</option>
-        <option value="JS">Jelek Sekali</option>
-      </select>
-    </div>
-    <div id="inputBiaya"><label>Biaya per m² Bangunan (Rp)</label><input type="text" id="biaya" class="rupiah-input" oninput="formatRupiah(this)"></div>
+  <div class="topbar">
+      <button id="darkModeToggle" onclick="toggleDarkMode()">🌙/☀️</button>
   </div>
-  <div class="button-container"><button class="action-button" onclick="hitung()">Hitung Nilai</button></div>
-  <div class="result" id="output"></div>
-  <div class="footer-icon">
-    <a href="https://www.instagram.com/ekabudiku" target="_blank" aria-label="Instagram">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-      </svg>
-    </a>
+  
+  <h2>Kalkulator Penyusutan Properti (Multi Sampel + RSD)</h2>
+
+  <div id="formContainer"></div>
+
+  <div class="button-container">
+    <button onclick="tambahSampel()">Tambah Sampel</button>
+    <button onclick="hitungMulti()">Hitung Semua</button>
   </div>
+
+  <div id="output"></div>
 </div>
 
 <script>
-function formatRupiah(el){
-  let v=el.value.replace(/\D/g,'');
-  el.value=v?new Intl.NumberFormat('id-ID').format(v):'';
-}
-function toggleInput(){
-  const jenis=document.getElementById("jenisProperti").value;
-  const isLahan = jenis==="lahan";
-  ["inputBangunan","inputTahunPembuatan","inputTahunRenovasi","inputKondisi","inputBiaya"]
-    .forEach(id=>document.getElementById(id).style.display=isLahan?"none":"block");
-}
-window.onload=toggleInput;
-
-// ======  tabel penyusutan ======
+// ====== Tabel Penyusutan (TIDAK BERUBAH) ======
 const tabelPenyusutan = {
   "rumah": {
     "low": {
@@ -149,29 +280,63 @@ const tabelPenyusutan = {
   }
 };
 
-function hitung(){
-  const jenisProperti=document.getElementById("jenisProperti").value;
-  const status=document.getElementById("status").value;
-  const jenis=document.getElementById("jenis").value;
-  const tanggal=new Date(document.getElementById("tanggal").value);
-  const harga=parseFloat(document.getElementById("harga").value.replace(/\./g,''))||0;
-  const luasTanah=parseFloat(document.getElementById("luasTanah").value)||0;
-  const outputDiv=document.getElementById("output");
-  if(!tanggal.getTime()||!harga||!luasTanah){
-    outputDiv.innerHTML="<b>Error:</b> Lengkapi kolom.";return;
-  }
+// ============ Utility (TIDAK BERUBAH) ==============
+function formatRupiah(el){
+  let v=el.value.replace(/\D/g,'');
+  el.value=v?new Intl.NumberFormat('id-ID').format(v):'';
+}
 
-  // Harga penyesuaian
-  let hargaPenyesuaian;
-  if (jenis==="Penawaran") {
-    hargaPenyesuaian=harga*0.9;
-  } else if (jenis==="Transaksi" || jenis==="Individual") {
-    hargaPenyesuaian=harga;
-  } else {
-    outputDiv.innerHTML="<b>Error:</b> Salah Entry Jenis Data.";return;
-  }
+let jumlahSampel=0;
+function tambahSampel(){
+  if(jumlahSampel>=5){alert("Maksimal 5 sampel!");return;}
+  jumlahSampel++;
+  const c=document.getElementById("formContainer");
+  const d=document.createElement("div");
+  d.className="sampel"; d.id="sampel"+jumlahSampel;
+  d.innerHTML=`
+    <h3>Sampel ${jumlahSampel}</h3>
+    <label>Jenis Properti</label>
+    <select id="jenisProperti${jumlahSampel}" onchange="toggleInput(${jumlahSampel})">
+      <option value="rumah">Rumah</option>
+      <option value="ruko">Ruko</option>
+      <option value="lahan">Lahan Kosong</option>
+    </select>
+    <label>Status Kepemilikan</label>
+    <select id="status${jumlahSampel}">
+      <option value="HM">HM</option><option value="HGB">HGB</option><option value="TMA">TMA</option><option value="HP">HP</option>
+    </select>
+    <label>Jenis Data</label>
+    <select id="jenis${jumlahSampel}">
+      <option value="Penawaran">Penawaran</option><option value="Transaksi">Transaksi</option><option value="Individual">Individual</option>
+    </select>
+    <label>Tgl. Penawaran/Transaksi</label><input type="date" id="tanggal${jumlahSampel}">
+    <label>Harga Penawaran/Transaksi (Rp)</label><input type="text" id="harga${jumlahSampel}" oninput="formatRupiah(this)">
+    <label>Luas Tanah (m²)</label><input type="number" id="luasTanah${jumlahSampel}">
+    <div id="inputBangunan${jumlahSampel}"><label>Luas Bangunan (m²)</label><input type="number" id="luasBangunan${jumlahSampel}"></div>
+    <div id="inputTahunPembuatan${jumlahSampel}"><label>Tahun Pembuatan</label><input type="number" id="tahunPembuatan${jumlahSampel}"></div>
+    <div id="inputTahunRenovasi${jumlahSampel}"><label>Tahun Renovasi (opsional)</label><input type="number" id="tahunRenovasi${jumlahSampel}"></div>
+    <div id="inputKondisi${jumlahSampel}"><label>Kondisi Fisik</label>
+      <select id="kondisi${jumlahSampel}">
+        <option value="BS">Baik Sekali</option><option value="B">Baik</option>
+        <option value="S">Sedang</option><option value="J">Jelek</option><option value="JS">Jelek Sekali</option>
+      </select>
+    </div>
+    <div id="inputBiaya${jumlahSampel}"><label>Biaya per m² Bangunan (Rp)</label><input type="text" id="biaya${jumlahSampel}" oninput="formatRupiah(this)"></div>
+  `;
+  c.appendChild(d); toggleInput(jumlahSampel);
+}
+function toggleInput(i){
+  const jenis=document.getElementById("jenisProperti"+i).value;
+  const isLahan=jenis==="lahan";
+  ["inputBangunan","inputTahunPembuatan","inputTahunRenovasi","inputKondisi","inputBiaya"]
+    .forEach(id=>document.getElementById(id+i).style.display=isLahan?"none":"block");
+}
 
-  // Lahan Kosong
+// ============ Proses Hitung (Disesuaikan dengan variabel warna baru) ==============
+function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBangunan,tahunPembuatan,tahunRenovasi,kondisi,biaya){
+  let hargaPenyesuaian=(jenis==="Penawaran")?harga*0.9:harga;
+  
+  // Lahan
   if(jenisProperti==="lahan"){
     let hargaDasar=hargaPenyesuaian/luasTanah;
     let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
@@ -179,21 +344,17 @@ function hitung(){
     let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
     let persenWaktu=0.10*tahunSelisih;
     let hargaFinal=hargaDasar*(1+persenWaktu+faktorStatus);
-
-    outputDiv.innerHTML=`<h3>Hasil Lahan Kosong</h3>
-      <div class="result-line"><span>Harga Dasar per m²</span><strong>Rp ${hargaDasar.toLocaleString('id-ID')}</strong></div>
-      <div class="result-line"><span>Penyesuaian Waktu (${(persenWaktu*100).toFixed(2)}%)</span><strong>+Rp ${(hargaDasar*persenWaktu).toLocaleString('id-ID')}</strong></div>
-      <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${(hargaDasar*faktorStatus).toLocaleString('id-ID')}</strong></div>
-      <div class="result-final"><span>Harga Akhir per m²</span><span class="value">Rp ${hargaFinal.toLocaleString('id-ID')}</span></div>`;
-    return;
+    return `
+      <div class="result-line"><span>Harga Dasar per m²</span><strong>Rp ${Math.round(hargaDasar).toLocaleString('id-ID')}</strong></div>
+      <div class="result-final"><span>Harga Akhir per m²</span><span class="value">Rp ${Math.round(hargaFinal).toLocaleString('id-ID')}</span></div>
+    `;
   }
 
-  // Bangunan (rumah/ruko)
-  const luasBangunan=parseFloat(document.getElementById("luasBangunan").value)||0;
-  const tahunPembuatan=parseInt(document.getElementById("tahunPembuatan").value)||0;
-  const tahunRenovasi=parseInt(document.getElementById("tahunRenovasi").value)||0;
-  const kondisi=document.getElementById("kondisi").value;
-  const biaya=parseFloat(document.getElementById("biaya").value.replace(/\./g,''))||0;
+  // Bangunan
+  biaya=parseFloat((biaya||"0").toString().replace(/\./g,''))||0;
+  luasBangunan=parseFloat(luasBangunan)||0;
+  tahunPembuatan=parseInt(tahunPembuatan)||0;
+  tahunRenovasi=parseInt(tahunRenovasi)||0;
 
   const tahunPenilaian=2025;
   const NPBB=luasBangunan*biaya;
@@ -203,14 +364,10 @@ function hitung(){
   }
   umurEfektif=Math.ceil(Math.max(0,Math.min(50,umurEfektif)));
 
-  // === Perbaikan kategori ===
+  // kategori
   let kategori="low";
-  if (jenisProperti==="rumah") {
-    kategori = biaya > 2000000 ? "high" : "low";
-  } else if (jenisProperti==="ruko") {
-    kategori = biaya > 3000000 ? "high" : "low";
-  }
-
+  if(jenisProperti==="rumah"){kategori=biaya>2000000?"high":"low";}
+  else if(jenisProperti==="ruko"){kategori=biaya>3000000?"high":"low";}
   const tabel=tabelPenyusutan[jenisProperti][kategori][kondisi];
   const umurIdx=Math.min(umurEfektif,tabel.length-1);
   const persen=tabel[umurIdx]||0;
@@ -218,25 +375,125 @@ function hitung(){
   const penyusutan=NPBB*(persen/100);
   const nilaiBangunan=NPBB-penyusutan;
   const hargaTanah=Math.abs(hargaPenyesuaian-nilaiBangunan);
-
   let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
   let akhir=new Date("2025-12-31");
   let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
   let penyesuaianWaktu=tahunSelisih*0.10;
-  const nilluas=(1+penyesuaianWaktu+faktorStatus)*hargaTanah;
-  const nilai=luasTanah>0?nilluas/luasTanah:0;
+  const nilai=(1+penyesuaianWaktu+faktorStatus)*hargaTanah/luasTanah;
 
-  outputDiv.innerHTML=`<h3>Hasil Properti</h3>
-    <div class="result-line"><span>NPBB</span><strong>Rp ${NPBB.toLocaleString('id-ID')}</strong></div>
+  return `
+    <div class="result-line"><span>NPBB</span><strong>Rp ${Math.round(NPBB).toLocaleString('id-ID')}</strong></div>
     <div class="result-line"><span>Umur Efektif</span><strong>${umurEfektif} th</strong></div>
-    <div class="result-line"><span>Persen Penyusutan</span><strong>${persen}%</strong></div>
-    <div class="result-line"><span>Nilai Bangunan</span><strong>Rp ${nilaiBangunan.toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Harga Penyesuaian</span><strong>Rp ${hargaPenyesuaian.toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Indikasi Harga Tanah</span><strong>Rp ${hargaTanah.toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Penyesuaian Waktu (${(penyesuaianWaktu*100).toFixed(2)}%)</span><strong>Rp ${(hargaTanah*penyesuaianWaktu).toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>Rp ${(hargaTanah*faktorStatus).toLocaleString('id-ID')}</strong></div>
-    <div class="result-final"><span>Nilai Tanah per m²</span><span class="value">Rp ${nilai.toLocaleString('id-ID')}</span></div>`;
+    <div class="result-line"><span>Penyusutan</span><strong>${persen}%</strong></div>
+    <div class="result-line"><span>Nilai Bangunan</span><strong>Rp ${Math.round(nilaiBangunan).toLocaleString('id-ID')}</strong></div>
+    <div class="result-final"><span>Nilai Tanah per m²</span><span class="value">Rp ${Math.round(nilai).toLocaleString('id-ID')}</span></div>
+  `;
 }
+
+// ============ Hitung Multi (Disesuaikan dengan variabel warna baru) ==============
+function hitungMulti(){
+  let out=document.getElementById("output"); out.innerHTML=""; let values=[];
+  for(let i=1;i<=jumlahSampel;i++){
+    const jenisProperti=document.getElementById("jenisProperti"+i).value;
+    const status=document.getElementById("status"+i).value;
+    const jenis=document.getElementById("jenis"+i).value;
+    const tanggal=new Date(document.getElementById("tanggal"+i).value);
+    const harga=parseFloat((document.getElementById("harga"+i).value||"0").replace(/\./g,''))||0;
+    const luasTanah=parseFloat(document.getElementById("luasTanah"+i).value)||0;
+    if(!tanggal.getTime()||!harga||!luasTanah) continue;
+
+    let hasil=prosesHitung(
+      jenisProperti,status,jenis,tanggal,harga,luasTanah,
+      document.getElementById("luasBangunan"+i)?.value,
+      document.getElementById("tahunPembuatan"+i)?.value,
+      document.getElementById("tahunRenovasi"+i)?.value,
+      document.getElementById("kondisi"+i)?.value,
+      document.getElementById("biaya"+i)?.value
+    );
+
+    let parser=new DOMParser(); let doc=parser.parseFromString("<div>"+hasil+"</div>","text/html");
+    let valText=doc.querySelector(".result-final .value")?.innerText.replace(/[^\d]/g,"");
+    let valNum=parseFloat(valText)||0; if(valNum>0) values.push(valNum);
+
+    out.innerHTML+=`<div class="result"><h4>Hasil Sampel ${i}</h4>${hasil}</div>`;
+  }
+  
+  const isDark = document.body.classList.contains('dark');
+  
+  // Variabel untuk hasil RSD
+  const RSD_COLORS = {
+      light: {
+          lowRSD_bg: "#d1e7dd", lowRSD_color: "#0a3622", highRSD_bg: "#f8d7da", highRSD_color: "#b00020", warning_bg: "#fff3cd", warning_color: "#664d03"
+      },
+      dark: {
+          lowRSD_bg: "#143e3d", lowRSD_color: "#a6d9b8", highRSD_bg: "#58151c", highRSD_color: "#f5c2c7", warning_bg: "#664d03", warning_color: "#fff3cd"
+      }
+  };
+  
+  const activeColors = isDark ? RSD_COLORS.dark : RSD_COLORS.light;
+
+
+  if(values.length>1){
+    let mean=values.reduce((a,b)=>a+b,0)/values.length;
+    let variance=values.reduce((a,b)=>a+Math.pow(b-mean,2),0)/values.length;
+    let sd=Math.sqrt(variance); let rsd=(sd/mean)*100;
+    
+    let color= rsd<=25 ? activeColors.lowRSD_color : activeColors.highRSD_color;
+    let bg= rsd<=25 ? activeColors.lowRSD_bg : activeColors.highRSD_bg;
+    let emoji= rsd<=25 ? "😀" : "😡";
+    
+    out.innerHTML+=`
+      <div class="result-final" style="background:${bg};color:${color};">
+        <span>Standar Deviasi Relatif (RSD)</span>
+        <div class="value">${rsd.toFixed(2)}% ${emoji}</div>
+      </div>`;
+  } else if (values.length === 1) {
+    out.innerHTML += `
+      <div class="result-final" style="background:${activeColors.warning_bg};color:${activeColors.warning_color};">
+        <span>RSD tidak dihitung</span>
+        <div class="value">Perlu minimal 2 sampel untuk RSD</div>
+      </div>`;
+  } else if (values.length === 0 && jumlahSampel > 0) {
+    out.innerHTML += `
+      <div class="result-final" style="background:${activeColors.highRSD_bg};color:${activeColors.highRSD_color};">
+        <span>Perhatian</span>
+        <div class="value">Tidak ada sampel dengan data lengkap/valid.</div>
+      </div>`;
+  }
+}
+
+// ============ FUNGSI DARK MODE BARU (Menggunakan class 'dark') ============
+function toggleDarkMode() {
+    const body = document.body;
+    const toggleButton = document.getElementById('darkModeToggle');
+    
+    // Toggle class 'dark'
+    body.classList.toggle('dark');
+    
+    // Simpan preferensi pengguna
+    const isDark = body.classList.contains('dark');
+    localStorage.setItem('darkModeEnabled', isDark);
+    
+    // Update tombol
+    toggleButton.innerText = isDark ? '🌙/☀️' : '🌙/☀️'; // Tetap seperti referensi
+    
+    // Jalankan ulang hitungan untuk memperbarui warna hasil
+    hitungMulti(); 
+}
+
+// Fungsi untuk memuat preferensi Dark Mode saat halaman dimuat
+function loadDarkModePreference() {
+    const isDark = localStorage.getItem('darkModeEnabled') === 'true';
+    if (isDark) {
+        document.body.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
+    }
+}
+
+// Panggil fungsi pemuatan preferensi & tampilkan sampel awal
+loadDarkModePreference();
+tambahSampel();
 </script>
 </body>
 </html>
