@@ -6,22 +6,22 @@
   <title>Kalkulator Penyusutan Properti (Multi Sampel + RSD)</title>
    <link rel="icon" type="image/png" href="favicon.png">
   <style>
-    /* 1. VARIABEL WARNA (Mendukung Dark Mode) - Menggunakan nama variabel dari referensi baru */
+    /* 1. VARIABEL WARNA (Mendukung Dark Mode) */
     :root {
       --bg: #f8f9fa;
-      --card-bg: #ffffff; /* Menggantikan --bg-container */
-      --text-color: #333; /* Menggantikan --color-text */
-      --accent-color: #007bff; /* Menggantikan --color-primary */
-      --accent-hover: #0056b3; /* Menggantikan --bg-button-hover */
-      --border-color: #dee2e6; /* Menggantikan --color-border & --color-line */
-      --result-bg: #e9ecef; /* Menggantikan --bg-result */
+      --card-bg: #ffffff; 
+      --text-color: #333; 
+      --accent-color: #007bff; 
+      --accent-hover: #0056b3; 
+      --border-color: #dee2e6; 
+      --result-bg: #e9ecef; 
       --result-final-bg: #d1e7dd;
       --result-final-text: #0a3622;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Menggantikan --color-shadow */
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
       --bg-sampel: #fdfdfd; 
     }
 
-    /* 2. DARK MODE STYLES - Menggunakan class 'dark' */
+    /* 2. DARK MODE STYLES */
     body.dark {
       --bg: #121212;
       --card-bg: #1e1e1e;
@@ -56,20 +56,20 @@
       padding: 1.5rem;
       border-radius: 12px;
       box-sizing: border-box;
-      background: var(--card-bg); /* Menggunakan --card-bg */
+      background: var(--card-bg); 
       box-shadow: var(--shadow);
       border: 1px solid var(--border-color);
     }
 
-    /* BARU: TOPBAR untuk Tombol Dark Mode */
+    /* TOPBAR untuk Tombol Dark Mode */
     .topbar {
       display: flex;
-      justify-content: flex-end; /* Dorong tombol ke kanan */
+      justify-content: flex-end; 
       margin-bottom: 1rem;
-      padding: 0 0.5rem; /* Sedikit padding agar tombol tidak menempel di tepi container */
+      padding: 0 0.5rem; 
     }
 
-    /* BARU: Gaya Tombol di Topbar */
+    /* Gaya Tombol di Topbar */
     #darkModeToggle {
         background: transparent;
         color: var(--accent-color);
@@ -288,7 +288,7 @@ function formatRupiah(el){
 
 let jumlahSampel=0;
 function tambahSampel(){
-  // KOREKSI INI: Batas maksimum dinaikkan menjadi 10
+  // Batas maksimum 10 sampel
   if(jumlahSampel>=10){alert("Maksimal 10 sampel!");return;}
   jumlahSampel++;
   const c=document.getElementById("formContainer");
@@ -333,11 +333,12 @@ function toggleInput(i){
     .forEach(id=>document.getElementById(id+i).style.display=isLahan?"none":"block");
 }
 
-// ============ Proses Hitung ==============
+// ============ Proses Hitung (Lahan Diperbarui) ==============
 function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBangunan,tahunPembuatan,tahunRenovasi,kondisi,biaya){
+  // 1. Penyesuaian Penawaran
   let hargaPenyesuaian=(jenis==="Penawaran")?harga*0.9:harga;
   
-  // Lahan
+  // 2. Lahan Kosong (Menggunakan Output yang Lebih Detail)
   if(jenisProperti==="lahan"){
     let hargaDasar=hargaPenyesuaian/luasTanah;
     let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
@@ -345,13 +346,17 @@ function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBan
     let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
     let persenWaktu=0.10*tahunSelisih;
     let hargaFinal=hargaDasar*(1+persenWaktu+faktorStatus);
+    
+    // Output dengan rincian penyesuaian
     return `
       <div class="result-line"><span>Harga Dasar per m²</span><strong>Rp ${Math.round(hargaDasar).toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Penyesuaian Waktu (${(persenWaktu*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaDasar*persenWaktu).toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaDasar*faktorStatus).toLocaleString('id-ID')}</strong></div>
       <div class="result-final"><span>Harga Akhir per m²</span><span class="value">Rp ${Math.round(hargaFinal).toLocaleString('id-ID')}</span></div>
     `;
   }
 
-  // Bangunan
+  // 3. Bangunan (rumah/ruko)
   biaya=parseFloat((biaya||"0").toString().replace(/\./g,''))||0;
   luasBangunan=parseFloat(luasBangunan)||0;
   tahunPembuatan=parseInt(tahunPembuatan)||0;
@@ -380,13 +385,19 @@ function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBan
   let akhir=new Date("2025-12-31");
   let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
   let penyesuaianWaktu=tahunSelisih*0.10;
-  const nilai=(1+penyesuaianWaktu+faktorStatus)*hargaTanah/luasTanah;
+  
+  const nilluas=(1+penyesuaianWaktu+faktorStatus)*hargaTanah;
+  const nilai=luasTanah>0?nilluas/luasTanah:0;
 
+  // Output dengan rincian untuk Properti dengan Bangunan
   return `
     <div class="result-line"><span>NPBB</span><strong>Rp ${Math.round(NPBB).toLocaleString('id-ID')}</strong></div>
     <div class="result-line"><span>Umur Efektif</span><strong>${umurEfektif} th</strong></div>
     <div class="result-line"><span>Penyusutan</span><strong>${persen}%</strong></div>
     <div class="result-line"><span>Nilai Bangunan</span><strong>Rp ${Math.round(nilaiBangunan).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Indikasi Harga Tanah</span><strong>Rp ${Math.round(hargaTanah).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Penyesuaian Waktu (${(penyesuaianWaktu*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaTanah*penyesuaianWaktu).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaTanah*faktorStatus).toLocaleString('id-ID')}</strong></div>
     <div class="result-final"><span>Nilai Tanah per m²</span><span class="value">Rp ${Math.round(nilai).toLocaleString('id-ID')}</span></div>
   `;
 }
@@ -413,6 +424,7 @@ function hitungMulti(){
     );
 
     let parser=new DOMParser(); let doc=parser.parseFromString("<div>"+hasil+"</div>","text/html");
+    // Ekstraksi nilai akhir untuk perhitungan RSD
     let valText=doc.querySelector(".result-final .value")?.innerText.replace(/[^\d]/g,"");
     let valNum=parseFloat(valText)||0; if(valNum>0) values.push(valNum);
 
@@ -467,7 +479,7 @@ function hitungMulti(){
   }
 }
 
-// ============ FUNGSI DARK MODE BARU (Menggunakan class 'dark') ============
+// ============ FUNGSI DARK MODE BARU ============
 function toggleDarkMode() {
     const body = document.body;
     const toggleButton = document.getElementById('darkModeToggle');
