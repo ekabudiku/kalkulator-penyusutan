@@ -335,71 +335,77 @@ function toggleInput(i){
 
 // ============ Proses Hitung (Lahan Diperbarui) ==============
 function prosesHitung(jenisProperti,status,jenis,tanggal,harga,luasTanah,luasBangunan,tahunPembuatan,tahunRenovasi,kondisi,biaya){
-  // 1. Penyesuaian Penawaran
-  let hargaPenyesuaian=(jenis==="Penawaran")?harga*0.9:harga;
-  
-  // 2. Lahan Kosong (Menggunakan Output yang Lebih Detail)
-  if(jenisProperti==="lahan"){
-    let hargaDasar=hargaPenyesuaian/luasTanah;
-    let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
-    let akhir=new Date("2025-12-31");
-    let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
-    let persenWaktu=0.10*tahunSelisih;
-    let hargaFinal=hargaDasar*(1+persenWaktu+faktorStatus);
-    
-    // Output dengan rincian penyesuaian
-    return `
-      <div class="result-line"><span>Harga Dasar per m²</span><strong>Rp ${Math.round(hargaDasar).toLocaleString('id-ID')}</strong></div>
-      <div class="result-line"><span>Penyesuaian Waktu (${(persenWaktu*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaDasar*persenWaktu).toLocaleString('id-ID')}</strong></div>
-      <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaDasar*faktorStatus).toLocaleString('id-ID')}</strong></div>
-      <div class="result-final"><span>Harga Akhir per m²</span><span class="value">Rp ${Math.round(hargaFinal).toLocaleString('id-ID')}</span></div>
-    `;
-  }
+  // 1. Penyesuaian Penawaran
+  let hargaPenyesuaian=(jenis==="Penawaran")?harga*0.9:harga;
+  
+  // 2. Lahan Kosong (Menggunakan Output yang Lebih Detail)
+  if(jenisProperti==="lahan"){
+    let hargaDasar=hargaPenyesuaian/luasTanah;
+    let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
+    let akhir=new Date("2025-12-31");
+    let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
+    let persenWaktu=0.10*tahunSelisih;
+    let hargaFinal=hargaDasar*(1+persenWaktu+faktorStatus);
+    // BARU: Hitung total nilai lahan yang disesuaikan
+    const totalNilaiLahanAdjusted = hargaFinal * luasTanah; 
+    
+    // Output dengan rincian penyesuaian
+    return `
+      <div class="result-line"><span>Harga (Disesuaikan)</span><strong>Rp ${Math.round(hargaPenyesuaian).toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Harga Dasar per m²</span><strong>Rp ${Math.round(hargaDasar).toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Penyesuaian Waktu (${(persenWaktu*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaDasar*persenWaktu).toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaDasar*faktorStatus).toLocaleString('id-ID')}</strong></div>
+      <div class="result-line"><span>Total Nilai Lahan (Adjusted)</span><strong>Rp ${Math.round(totalNilaiLahanAdjusted).toLocaleString('id-ID')}</strong></div>
+      <div class="result-final"><span>Harga Akhir per m²</span><span class="value">Rp ${Math.round(hargaFinal).toLocaleString('id-ID')}</span></div>
+    `;
+  }
 
-  // 3. Bangunan (rumah/ruko)
-  biaya=parseFloat((biaya||"0").toString().replace(/\./g,''))||0;
-  luasBangunan=parseFloat(luasBangunan)||0;
-  tahunPembuatan=parseInt(tahunPembuatan)||0;
-  tahunRenovasi=parseInt(tahunRenovasi)||0;
+  // 3. Bangunan (rumah/ruko)
+  biaya=parseFloat((biaya||"0").toString().replace(/\./g,''))||0;
+  luasBangunan=parseFloat(luasBangunan)||0;
+  tahunPembuatan=parseInt(tahunPembuatan)||0;
+  tahunRenovasi=parseInt(tahunRenovasi)||0;
 
-  const tahunPenilaian=2025;
-  const NPBB=luasBangunan*biaya;
-  let umurEfektif=tahunPenilaian-tahunPembuatan;
-  if(tahunRenovasi>tahunPembuatan){
-    umurEfektif=((tahunPenilaian-tahunPembuatan)+2*(tahunPenilaian-tahunRenovasi))/3;
-  }
-  umurEfektif=Math.ceil(Math.max(0,Math.min(50,umurEfektif)));
+  const tahunPenilaian=2025;
+  const NPBB=luasBangunan*biaya;
+  let umurEfektif=tahunPenilaian-tahunPembuatan;
+  if(tahunRenovasi>tahunPembuatan){
+    umurEfektif=((tahunPenilaian-tahunPembuatan)+2*(tahunPenilaian-tahunRenovasi))/3;
+  }
+  umurEfektif=Math.ceil(Math.max(0,Math.min(50,umurEfektif)));
 
-  // kategori
-  let kategori="low";
-  if(jenisProperti==="rumah"){kategori=biaya>2000000?"high":"low";}
-  else if(jenisProperti==="ruko"){kategori=biaya>3000000?"high":"low";}
-  const tabel=tabelPenyusutan[jenisProperti][kategori][kondisi];
-  const umurIdx=Math.min(umurEfektif,tabel.length-1);
-  const persen=tabel[umurIdx]||0;
+  // kategori
+  let kategori="low";
+  if(jenisProperti==="rumah"){kategori=biaya>2000000?"high":"low";}
+  else if(jenisProperti==="ruko"){kategori=biaya>3000000?"high":"low";}
+  const tabel=tabelPenyusutan[jenisProperti][kategori][kondisi];
+  const umurIdx=Math.min(umurEfektif,tabel.length-1);
+  const persen=tabel[umurIdx]||0;
 
-  const penyusutan=NPBB*(persen/100);
-  const nilaiBangunan=NPBB-penyusutan;
-  const hargaTanah=Math.abs(hargaPenyesuaian-nilaiBangunan);
-  let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
-  let akhir=new Date("2025-12-31");
-  let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
-  let penyesuaianWaktu=tahunSelisih*0.10;
-  
-  const nilluas=(1+penyesuaianWaktu+faktorStatus)*hargaTanah;
-  const nilai=luasTanah>0?nilluas/luasTanah:0;
+  const penyusutan=NPBB*(persen/100);
+  const nilaiBangunan=NPBB-penyusutan;
+  const hargaTanah=hargaPenyesuaian-nilaiBangunan;
+  let faktorStatus=(status==="TMA")?0.10:(status==="HGB"||status==="HP")?0.05:0;
+  let akhir=new Date("2025-12-31");
+  let tahunSelisih=(akhir-tanggal)/(1000*60*60*24*365);
+  let penyesuaianWaktu=tahunSelisih*0.10;
+  
+  const nilluas=(1+penyesuaianWaktu+faktorStatus)*hargaTanah; // Ini adalah Total Nilai Tanah (Adjusted)
+  const nilai=luasTanah>0?nilluas/luasTanah:0;
 
-  // Output dengan rincian untuk Properti dengan Bangunan
-  return `
-    <div class="result-line"><span>NPBB</span><strong>Rp ${Math.round(NPBB).toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Umur Efektif</span><strong>${umurEfektif} th</strong></div>
-    <div class="result-line"><span>Penyusutan</span><strong>${persen}%</strong></div>
-    <div class="result-line"><span>Nilai Bangunan</span><strong>Rp ${Math.round(nilaiBangunan).toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Indikasi Harga Tanah</span><strong>Rp ${Math.round(hargaTanah).toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Penyesuaian Waktu (${(penyesuaianWaktu*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaTanah*penyesuaianWaktu).toLocaleString('id-ID')}</strong></div>
-    <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaTanah*faktorStatus).toLocaleString('id-ID')}</strong></div>
-    <div class="result-final"><span>Nilai Tanah per m²</span><span class="value">Rp ${Math.round(nilai).toLocaleString('id-ID')}</span></div>
-  `;
+  // Output dengan rincian untuk Properti dengan Bangunan
+  return `
+    <div class="result-line"><span>Harga (Disesuaikan)</span><strong>Rp ${Math.round(hargaPenyesuaian).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>NPBB</span><strong>Rp ${Math.round(NPBB).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Umur Efektif</span><strong>${umurEfektif} th</strong></div>
+    <div class="result-line"><span>Penyusutan</span><strong>${persen}%</strong></div>
+    <div class="result-line"><span>Nilai Bangunan</span><strong>Rp ${Math.round(nilaiBangunan).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Indikasi Harga Tanah</span><strong>Rp ${Math.round(hargaTanah).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Penyesuaian Waktu (${(penyesuaianWaktu*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaTanah*penyesuaianWaktu).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Penyesuaian Status (${(faktorStatus*100).toFixed(2)}%)</span><strong>+Rp ${Math.round(hargaTanah*faktorStatus).toLocaleString('id-ID')}</strong></div>
+    <div class="result-line"><span>Total Nilai Tanah (Adjusted)</span><strong>Rp ${Math.round(nilluas).toLocaleString('id-ID')}</strong></div>
+    <div class="result-final"><span>Nilai Tanah per m²</span><span class="value">Rp ${Math.round(nilai).toLocaleString('id-ID')}</span></div>
+  `;
 }
 
 // ============ Hitung Multi ==============
