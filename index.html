@@ -65,10 +65,13 @@ body{
 }
 
 .container{
+  width:100%;
   max-width:1200px;
   margin:auto;
   padding:1rem;
+  box-sizing:border-box;
 }
+
 
 /* ================= HEADER ================= */
 .header-wrapper{
@@ -98,29 +101,40 @@ body{
   font-size:1.1rem;
 }
 
-/* ================= GRID ================= */
-#formContainer,#output{
-  display:grid;
-  grid-template-columns:1fr;
+/* ================= FORM CONTAINER ================= */
+
+/* DEFAULT → 1 SAMPEL CENTER */
+#formContainer{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
   gap:1.5rem;
+  width:100%;
 }
 
-@media(min-width:768px){
-  #formContainer,#output{
-    grid-template-columns:repeat(2,1fr);
-  }
+/* Jika ada >1 sampel → grid */
+#formContainer:has(.sampel:nth-child(2)){
+  display:grid;
+  grid-template-columns:1fr;
+  justify-content:stretch;
+  align-items:start;
 }
 
 /* ================= CARD ================= */
-.sampel,.result{
+.sampel,
+.result{
   background:var(--card-bg);
   padding:1.5rem;
   border-radius:24px;
   box-shadow:var(--soft-shadow);
   position:relative;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
 }
 
-.sampel h3,.result h4{
+.sampel h3,
+.result h4{
   margin-top:0;
   color:var(--accent);
 }
@@ -134,25 +148,17 @@ label{
   display:block;
 }
 
-/* ===== INPUT SERAGAM ===== */
 input,
 select{
   width:100%;
   height:var(--input-height);
   padding:0 .9rem;
-  margin-top:.2rem;
-
-  display:flex;
-  align-items:center;
-
   border:none;
   border-radius:14px;
   background:var(--card-bg);
   box-shadow:var(--inset-shadow);
-
   color:var(--text-color);
   font-size:.95rem;
-  line-height:1;
   box-sizing:border-box;
   appearance:none;
 }
@@ -162,32 +168,7 @@ select:focus{
   outline:none;
 }
 
-input[type="date"]{
-  padding-right:.6rem;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator{
-  margin:0;
-  cursor: pointer;
-}
-
-/* FIX: Kalender Icon di Dark Mode */
-body.dark ::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-}
-
-/* FIX AUTOFILL BACKGROUND */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px var(--card-bg) inset !important;
-    -webkit-text-fill-color: var(--text-color) !important;
-    border-radius: 14px !important;
-    transition: background-color 5000s ease-in-out 0s;
-}
-
-/* ================= BUTTONS ================= */
+/* ================= BUTTON ================= */
 .button-container{
   margin:2rem 0;
   padding:1.5rem;
@@ -197,13 +178,6 @@ input:-webkit-autofill:active {
   flex-direction:column;
   gap:1rem;
   align-items:center;
-}
-
-@media(min-width:768px){
-  .button-container{
-    flex-direction:row;
-    justify-content:center;
-  }
 }
 
 button.main-btn{
@@ -238,117 +212,240 @@ button.main-btn:hover{
 }
 
 /* ================= RESULT ================= */
+#output{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:1.5rem;
+  width:100%;
+}
+
 .result-line{
   display:flex;
   justify-content:space-between;
-  padding:.5rem 0;
-  font-size:.9rem;
-  border-bottom: 1px solid rgba(150,150,150,0.1);
+  align-items:center;        /* FIX vertical alignment */
+  gap:1rem;
 }
-.result-line:last-child {
-    border-bottom: none;
-}
-.result-line strong {
-    text-align: right;
+
+.result-line strong{
+  white-space:nowrap;        /* FIX: Rp + angka satu baris */
+  text-align:right;
+  flex-shrink:0;             /* FIX: tidak dipaksa mengecil */
 }
 
 .result-final{
   margin-top:1rem;
   padding:1rem;
-  text-align:center;
   border-radius:18px;
   background:var(--success-bg);
   color:var(--success-text);
   box-shadow:var(--soft-shadow);
   grid-column:1/-1;
+
+  display:flex;                 /* FIX layout */
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  text-align:center;
 }
 
 .result-final .value{
   font-size:1.4rem;
   font-weight:bold;
-}
-.result-final.rsd-high{
-  color: var(--danger);
-}
-
-.result-final span{
-  display:block;
+  white-space:nowrap;           /* FIX: Rp + angka satu baris */
+  font-variant-numeric: tabular-nums; /* angka rata profesional */
 }
 
-.result-final span:first-child{
-  font-size:0.9rem;
-  opacity:0.85;
-  margin-bottom:0.3rem;
+/* ================= TABLET ================= */
+@media (min-width:768px){
+
+  .sampel,
+  .result{
+    max-width:520px;
+  }
+
+  #formContainer:has(.sampel:nth-child(2)){
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  #output{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .button-container{
+    flex-direction:row;
+    justify-content:center;
+  }
 }
 
+/* ================= DESKTOP BESAR ================= */
+@media (min-width:1200px){
+
+  #formContainer{
+    max-width:1100px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  #formContainer:has(.sampel:nth-child(2)){
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
 
 /* ================= FOOTER ================= */
-.footer {
-  text-align: center;
-  margin-top: 3rem;
-  margin-bottom: 2rem;
-  display: flex;
-  justify-content: center;
+.footer{
+  text-align:center;
+  margin-top:3rem;
+  margin-bottom:2rem;
+  display:flex;
+  justify-content:center;
 }
 
-.insta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0.8rem 1.5rem;
-  background: var(--card-bg);
-  color: var(--text-color);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
-  border-radius: 50px;
-  box-shadow: var(--soft-shadow);
-  transition: all 0.2s ease-in-out;
+.insta-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:0.8rem 1.5rem;
+  background:var(--card-bg);
+  color:var(--text-color);
+  text-decoration:none;
+  font-weight:600;
+  font-size:0.95rem;
+  border-radius:50px;
+  box-shadow:var(--soft-shadow);
+  transition:all 0.2s ease-in-out;
 }
 
-.insta-btn:hover {
-  box-shadow: var(--inset-shadow);
-  color: var(--accent);
-  transform: translateY(2px);
+.insta-btn:hover{
+  box-shadow:var(--inset-shadow);
+  color:var(--accent);
+  transform:translateY(2px);
 }
 
-.insta-btn svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
+.insta-btn svg{
+  width:20px;
+  height:20px;
+  fill:currentColor;
+}
+/* ================= FIX INPUT PUTIH SETELAH KETIK ================= */
+
+input[type="text"],
+input[type="number"],
+select{
+  background-color:var(--card-bg) !important;
+  color:var(--text-color);
+}
+
+/* Chrome autofill override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active{
+  -webkit-box-shadow:0 0 0 1000px var(--card-bg) inset !important;
+  -webkit-text-fill-color:var(--text-color) !important;
+  transition:background-color 5000s ease-in-out 0s;
+  border-radius:14px;
+}
+
+/* Saat input aktif (setelah ketik) */
+input:focus{
+  background-color:var(--card-bg) !important;
+}
+/* ================= FIX TINGGI CARD HASIL ================= */
+
+.result{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+.result-final{
+  margin-top:auto;
+}
+
+#output{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:1.5rem;
+  align-items:stretch;
+}
+
+@media (min-width:768px){
+  #output{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+/* ================= INSTAGRAM BUTTON ================= */
+
+.footer{
+  margin-top:3rem;
+  margin-bottom:2rem;
+  display:flex;
+  justify-content:center;
+}
+
+.insta-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:0.9rem 1.6rem;
+
+  background:var(--card-bg);
+  color:var(--text-color);
+  text-decoration:none;
+  font-weight:600;
+  font-size:0.95rem;
+
+  border-radius:50px;
+  box-shadow:var(--soft-shadow);
+
+  transition:all 0.2s ease-in-out;
+}
+
+.insta-btn:hover{
+  box-shadow:var(--inset-shadow);
+  color:var(--accent);
+  transform:translateY(2px);
+}
+
+.insta-btn svg{
+  width:20px;
+  height:20px;
+  fill:currentColor;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-
-<div class="header-wrapper">
-  <div class="topbar">
-    <button id="darkModeToggle" onclick="toggleDarkMode()">🌙</button>
+  <div class="header-wrapper">
+    <div class="topbar">
+      <button id="darkModeToggle" onclick="toggleDarkMode()">🌙</button>
+    </div>
+    <h2>Kalkulator Properti</h2>
   </div>
-  <h2>Kalkulator Properti</h2>
-  
-</div>
 
-<div id="formContainer"></div>
+  <div id="formContainer"></div>
 
-<div class="button-container">
-  <button class="main-btn" onclick="tambahSampel()">+ Tambah Sampel</button>
-  <button class="main-btn" onclick="hitungMulti()">Hitung Semua</button>
-</div>
+  <div class="button-container">
+    <button class="main-btn" onclick="tambahSampel()">+ Tambah Sampel</button>
+    <button class="main-btn" onclick="hitungMulti()">Hitung Semua</button>
+  </div>
 
-<div id="output"></div>
+  <div id="output"></div>
+  <div class="footer">
+  <a href="https://instagram.com/ekabudiku" 
+     target="_blank" 
+     class="insta-btn"
+     aria-label="Instagram Ekabudiku">
 
-<div class="footer">
-  <a href="https://www.instagram.com/ekabudiku/" target="_blank" class="insta-btn">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      <path d="M7.75 2C4.57 2 2 4.57 2 7.75v8.5C2 19.43 4.57 22 7.75 22h8.5C19.43 22 22 19.43 22 16.25v-8.5C22 4.57 19.43 2 16.25 2h-8.5zm0 2h8.5C18.01 4 20 5.99 20 7.75v8.5C20 18.01 18.01 20 16.25 20h-8.5C5.99 20 4 18.01 4 16.25v-8.5C4 5.99 5.99 4 7.75 4zm4.25 2.5A5.75 5.75 0 006.25 12 5.75 5.75 0 0012 17.75 5.75 5.75 0 0017.75 12 5.75 5.75 0 0012 6.5zm0 2A3.75 3.75 0 0115.75 12 3.75 3.75 0 0112 15.75 3.75 3.75 0 018.25 12 3.75 3.75 0 0112 8.5zm5.5-3.75a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"/>
     </svg>
-    Created by @ekabudiku
+
+    @ekabudiku
   </a>
 </div>
-
 </div>
 
 <script>
