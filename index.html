@@ -18,8 +18,7 @@
       align-items: center;
       background-color: #0f172a;
       padding: 16px;
-      cursor: pointer;
-      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .container {
@@ -28,7 +27,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
     }
 
     .container img {
@@ -39,21 +38,35 @@
       display: block;
     }
 
-    .tap-hint {
-      color: #94a3b8;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 14px;
-      text-align: center;
-      padding: 8px 16px;
-      background: rgba(30, 41, 59, 0.7);
+    .play-button {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #ffffff;
+      border: none;
+      padding: 14px 32px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
       border-radius: 9999px;
-      backdrop-filter: blur(4px);
-      transition: opacity 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
+      transition: all 0.2s ease-in-out;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .hidden {
-      opacity: 0;
-      pointer-events: none;
+    .play-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+    }
+
+    .play-button:active {
+      transform: scale(0.95);
+    }
+
+    .play-button.playing {
+      background: #10b981;
+      box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
     }
   </style>
 </head>
@@ -64,29 +77,31 @@
       src="happy-cat.gif" 
       alt="Happy Cat"
     >
-    <div id="hint" class="tap-hint">Klik di mana saja untuk putar lagu 🎵</div>
+    <button id="btn-play" class="play-button">
+      ▶ MUSIKKKK
+    </button>
   </main>
 
   <audio id="my-audio" src="sound.mp3" loop preload="auto"></audio>
 
   <script>
     const audio = document.getElementById('my-audio');
-    const hint = document.getElementById('hint');
-    let isPlayed = false;
+    const btnPlay = document.getElementById('btn-play');
 
-    function playAudio() {
-      if (!isPlayed) {
+    btnPlay.addEventListener('click', () => {
+      if (audio.paused) {
         audio.play().then(() => {
-          isPlayed = true;
-          hint.classList.add('hidden');
+          btnPlay.textContent = '⏸ PAUSE';
+          btnPlay.classList.add('playing');
         }).catch(err => {
-          console.log("Menunggu interaksi pengguna:", err);
+          console.log("Audio playback error:", err);
         });
+      } else {
+        audio.pause();
+        btnPlay.textContent = '▶ MUSIKKKK';
+        btnPlay.classList.remove('playing');
       }
-    }
-
-    document.body.addEventListener('click', playAudio, { once: true });
-    document.body.addEventListener('touchstart', playAudio, { once: true });
+    });
   </script>
 </body>
 </html>
