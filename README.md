@@ -64,3 +64,6 @@ Akses versi online melalui GitHub Pages:
 
 * **Eka Budi**
 * Instagram: [@ekabudiku](https://instagram.com/ekabudiku)
+
+📄 Lisensi
+Proyek ini dilisensikan di bawah MIT License.
