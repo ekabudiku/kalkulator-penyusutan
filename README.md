@@ -56,7 +56,7 @@ git clone https://github.com/ekabudiku/kalkulator-penyusutan.git
 
 Akses versi online melalui GitHub Pages:
 
-👉 [https://ekabudiku.github.io/kalkulator-penyusutan/](https://www.google.com/search?q=https://ekabudiku.github.io/kalkulator-penyusutan/)
+👉 [https://ekabudiku.github.io/kalkulator-penyusutan/](https://ekabudiku.github.io/kalkulator-penyusutan/)
 
 ---
 
